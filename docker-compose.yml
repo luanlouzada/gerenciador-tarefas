@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: task-postgres
+    environment:
+      POSTGRES_DB: tasksmanager
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d tasksmanager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tasksmanager-network
+
+volumes:
+  postgres_data:
+    name: tasksmanager_postgres_data
+
+networks:
+  tasksmanager-network:
+    name: tasksmanager_network
+    driver: bridge
