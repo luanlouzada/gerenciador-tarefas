@@ -28,10 +28,11 @@ public class WebSocketConfig implements WebSocketConfigurer {
         this.userQueryGateway = userQueryGateway;
     }
 
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(notificationWebSocketHandler, "/ws/notifications")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("https://gerenciador-frontend-five.vercel.app/")
                 .addInterceptors(new WebSocketAuthHandshakeInterceptor(jwtService, userQueryGateway))
                 .withSockJS()
                 .setSuppressCors(false)

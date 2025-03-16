@@ -27,7 +27,7 @@ import static br.com.gerenciador.infrastructure.utils.Utilities.log;
 
 @RestController
 @RequestMapping("api/v1/user")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://gerenciador-frontend-five.vercel.app/")
 @RateLimiter(name = "basicRateLimit")
 @Tag(name = "User", description = "Endpoints for user management")
 public class UserController {

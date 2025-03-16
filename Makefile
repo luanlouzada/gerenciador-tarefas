@@ -3,7 +3,15 @@ MVN_WRAPPER = ./mvnw
 TARGET_DIR = target
 COMPOSE_PROJECT_NAME = tasksmanager
 DB_NAME = tasksmanager
-DB_USER = admin
+
+# Variáveis de ambiente para banco de dados - valores padrão se não definidos
+DATABASE_URL ?= jdbc:postgresql://localhost:5432/tasksmanager
+DATABASE_USERNAME ?= admin
+DATABASE_PASSWORD ?= admin
+
+# Extrai host e porta do DATABASE_URL para Docker e comandos específicos
+DB_HOST = $(shell echo $(DATABASE_URL) | sed -n 's/.*:\/\/\([^:]*\).*/\1/p')
+DB_PORT = $(shell echo $(DATABASE_URL) | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
 
 # Comandos principais
 .PHONY: all clean build run test install verify help docker-up docker-down docker-restart dev setup-permissions check-db db-init db-migrate db-reset
@@ -33,6 +41,9 @@ build:
 
 # Executa o projeto
 run:
+	DATABASE_URL=$(DATABASE_URL) \
+	DATABASE_USERNAME=$(DATABASE_USERNAME) \
+	DATABASE_PASSWORD=$(DATABASE_PASSWORD) \
 	$(MVN_WRAPPER) spring-boot:run
 
 # Executa os testes
@@ -90,16 +101,16 @@ check-db:
 # Comandos de Banco de Dados
 db-init: check-db
 	@echo "Inicializando banco de dados..."
-	@docker exec -i tasksmanager-postgres psql -U $(DB_USER) -d postgres -c "DROP DATABASE IF EXISTS $(DB_NAME);"
-	@docker exec -i tasksmanager-postgres psql -U $(DB_USER) -d postgres -c "CREATE DATABASE $(DB_NAME);"
+	@docker exec -i tasksmanager-postgres psql -U $(DATABASE_USERNAME) -d postgres -c "DROP DATABASE IF EXISTS $(DB_NAME);"
+	@docker exec -i tasksmanager-postgres psql -U $(DATABASE_USERNAME) -d postgres -c "CREATE DATABASE $(DB_NAME);"
 	@echo "Banco de dados $(DB_NAME) criado com sucesso"
 
 db-migrate:
 	@echo "Executando migrações..."
 	$(MVN_WRAPPER) flyway:migrate \
-		-Dflyway.url=jdbc:postgresql://localhost:5433/tasksmanager \
-		-Dflyway.user=admin \
-		-Dflyway.password=admin \
+		-Dflyway.url=$(DATABASE_URL) \
+		-Dflyway.user=$(DATABASE_USERNAME) \
+		-Dflyway.password=$(DATABASE_PASSWORD) \
 		-Dflyway.locations=filesystem:src/main/resources/db/migration \
 		-Dflyway.baselineOnMigrate=true \
 		-Dflyway.validateOnMigrate=true
@@ -107,16 +118,16 @@ db-migrate:
 db-clean:
 	@echo "Limpando todas as migrações do Flyway..."
 	$(MVN_WRAPPER) flyway:clean \
-	-Dflyway.url=jdbc:postgresql://localhost:5433/tasksmanager \
-	-Dflyway.user=admin \
-	-Dflyway.password=admin
+	-Dflyway.url=$(DATABASE_URL) \
+	-Dflyway.user=$(DATABASE_USERNAME) \
+	-Dflyway.password=$(DATABASE_PASSWORD)
 
 db-repair:
 	@echo "Reparando o histórico do Flyway..."
 	$(MVN_WRAPPER) flyway:repair \
-	-Dflyway.url=jdbc:postgresql://localhost:5433/tasksmanager \
-	-Dflyway.user=admin \
-	-Dflyway.password=admin
+	-Dflyway.url=$(DATABASE_URL) \
+	-Dflyway.user=$(DATABASE_USERNAME) \
+	-Dflyway.password=$(DATABASE_PASSWORD)
 
 db-reset: db-init db-migrate
 	@echo "Banco de dados resetado e migrado com sucesso"
@@ -125,11 +136,9 @@ db-reset: db-init db-migrate
 dev: setup-permissions check-db db-reset
 	@echo "Iniciando em modo desenvolvimento com hot reload..."
 	export SPRING_PROFILES_ACTIVE=dev && \
-	export POSTGRES_HOST=localhost && \
-	export POSTGRES_PORT=5433 && \
-	export POSTGRES_DB=tasksmanager && \
-	export POSTGRES_USER=admin && \
-	export POSTGRES_PASSWORD=admin && \
+	export DATABASE_URL=$(DATABASE_URL) && \
+	export DATABASE_USERNAME=$(DATABASE_USERNAME) && \
+	export DATABASE_PASSWORD=$(DATABASE_PASSWORD) && \
 	$(MVN_WRAPPER) spring-boot:run \
 		-Dspring-boot.run.jvmArguments="-XX:TieredStopAtLevel=1 -noverify -Dspring.devtools.restart.enabled=true -Dspring.devtools.livereload.enabled=true" \
 		-Dspring-boot.run.addResources=true \

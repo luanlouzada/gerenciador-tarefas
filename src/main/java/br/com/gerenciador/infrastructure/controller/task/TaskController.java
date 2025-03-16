@@ -34,7 +34,7 @@ import static br.com.gerenciador.infrastructure.utils.Utilities.log;
 
 @RestController
 @RequestMapping("api/v1/task")
-@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+@CrossOrigin(origins = "https://gerenciador-frontend-five.vercel.app/", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
         RequestMethod.DELETE, RequestMethod.OPTIONS})
 @Tag(name = "Task", description = "Endpoints for task management")
 @SecurityRequirement(name = "bearerAuth")
