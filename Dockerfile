@@ -41,12 +41,22 @@ ENV DATABASE_PASSWORD=admin
 ENV JWT_SECRET=your_jwt_secret_key
 ENV ALLOWED_ORIGINS=https://gerenciador-frontend-five.vercel.app
 
-# Cria um script de inicialização
+# Cria um script de inicialização com expressão corrigida
 RUN echo '#!/bin/bash\n\
 echo "Esperando o banco de dados inicializar..."\n\
-DB_HOST=$(echo $DATABASE_URL | sed -n "s|jdbc:postgresql://\\([^:]*\\).*|\\1|p")\n\
-echo "Conectando ao host: $DB_HOST"\n\
-until PGPASSWORD=$DATABASE_PASSWORD psql -h $DB_HOST -U $DATABASE_USERNAME -c "\\q"; do\n\
+\n\
+# Extrair o host e porta do DATABASE_URL\n\
+if [[ "$DATABASE_URL" =~ jdbc:postgresql://([^:/]+)(:([0-9]+))?/ ]]; then\n\
+  DB_HOST="${BASH_REMATCH[1]}"\n\
+  DB_PORT="${BASH_REMATCH[3]:-5432}"\n\
+  echo "Conectando ao banco de dados no host: $DB_HOST porta: $DB_PORT"\n\
+else\n\
+  echo "DATABASE_URL inválida: $DATABASE_URL"\n\
+  exit 1\n\
+fi\n\
+\n\
+# Aguardar até que o banco de dados esteja disponível\n\
+until PGPASSWORD=$DATABASE_PASSWORD psql -h "$DB_HOST" -p "$DB_PORT" -U "$DATABASE_USERNAME" -c "\\q"; do\n\
   >&2 echo "Banco de dados indisponível - esperando..."\n\
   sleep 2\n\
 done\n\
@@ -58,5 +68,9 @@ echo "Iniciando a aplicação..."\n\
 java -jar app.jar\n\
 ' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-# Comando para iniciar a aplicação - USANDO O SCRIPT
+# Healthcheck para verificar se a aplicação está rodando
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Comando para iniciar a aplicação usando o script
 ENTRYPOINT ["/app/entrypoint.sh"]
