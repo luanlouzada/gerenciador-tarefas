@@ -1,23 +1,37 @@
-## Desafio
+# Sistema Gerenciador de Tarefas
 
-Gerenciador de tarefa
+## Visão Geral
 
-A Tarefa tem data de execucação
+Sistema para controle e gerenciamento de tarefas com funcionalidades de cadastro, consulta, edição e exclusão. Inclui sistema de notificações para alertar sobre prazos de vencimento.
 
-tarefa
-- titulo
-- descricao
-- data limite da execução
-- status = em andamento, pendente, concluido
-- createdAt
-sistema deve permitir que faça cadastro, listar(por data e título), editar e deletar tarefas
+## Entidade: Tarefa
 
-regra nenhuma tarefa deva ser registrado com data limite no passado
+### Atributos
 
-validação na entrada de dados
-- titulo não pode ser vazio, ou menor que 20 caracteres
+- **Título**: Nome identificador da tarefa
+- **Descrição**: Detalhamento das informações da tarefa
+- **Data Limite**: Prazo final para execução da tarefa
+- **Status**: Estado atual da tarefa (pendente, em andamento, concluído)
+- **Data de Criação**: Momento em que a tarefa foi registrada no sistema
 
-o sistema precisa gerar notificação, 
-deve consultar no banco as tarefas que vencem no dia
-e gerar um timer(talvez assincrono e enviar email)
+## Funcionalidades
 
+### Gerenciamento de Tarefas
+
+- Cadastro de novas tarefas
+- Listagem de tarefas com filtros por:
+  - Data limite
+  - Título
+- Edição de tarefas existentes
+- Exclusão de tarefas
+
+### Regras de Negócio
+
+- Não é permitido registrar tarefas com data limite anterior à data atual
+- O título da tarefa deve conter no mínimo 20 caracteres e não pode estar vazio
+
+## Sistema de Notificações
+
+- Verificação diária de tarefas com vencimento no dia corrente
+- Implementação de timer para processamento das notificações
+- Envio de alertas por email aos usuários responsáveis

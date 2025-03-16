@@ -11,6 +11,7 @@ import br.com.gerenciador.infrastructure.entity.UserEntity;
 import br.com.gerenciador.infrastructure.mapper.TaskMapper;
 import br.com.gerenciador.infrastructure.repository.UserEntityRepository;
 import br.com.gerenciador.usecase.task.*;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,8 +34,11 @@ import static br.com.gerenciador.infrastructure.utils.Utilities.log;
 
 @RestController
 @RequestMapping("api/v1/task")
+@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+        RequestMethod.DELETE, RequestMethod.OPTIONS})
 @Tag(name = "Task", description = "Endpoints for task management")
 @SecurityRequirement(name = "bearerAuth")
+@RateLimiter(name = "basicRateLimit")
 public class TaskController {
     private final TaskCreationUseCase taskCreationUseCase;
     private final TaskDeletionUseCase taskDeletionUseCase;
@@ -143,8 +147,7 @@ public class TaskController {
 
     @Operation(summary = "Update task", description = "Updates an existing task for the authenticated user")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Task updated successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Task updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Task not found")

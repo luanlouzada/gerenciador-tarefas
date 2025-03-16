@@ -1,17 +1,5 @@
 package br.com.gerenciador.infrastructure.controller.user;
 
-import static br.com.gerenciador.infrastructure.utils.Utilities.log;
-
-import java.util.UUID;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.com.gerenciador.domain.exception.UserException;
 import br.com.gerenciador.infrastructure.dto.request.user.LoginUserRequest;
 import br.com.gerenciador.infrastructure.dto.request.user.RegistrationUserRequest;
@@ -21,6 +9,7 @@ import br.com.gerenciador.infrastructure.mapper.UserMapper;
 import br.com.gerenciador.infrastructure.security.JwtService;
 import br.com.gerenciador.usecase.user.UserAuthenticationUseCase;
 import br.com.gerenciador.usecase.user.UserRegistrationUseCase;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,9 +17,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+import static br.com.gerenciador.infrastructure.utils.Utilities.log;
 
 @RestController
 @RequestMapping("api/v1/user")
+@CrossOrigin(origins = "http://localhost:3000")
+@RateLimiter(name = "basicRateLimit")
 @Tag(name = "User", description = "Endpoints for user management")
 public class UserController {
     private final UserRegistrationUseCase userRegistrationUseCase;
@@ -39,7 +37,8 @@ public class UserController {
     private final JwtService jwtService;
 
     public UserController(UserRegistrationUseCase userRegistrationUseCase,
-            UserAuthenticationUseCase userAuthenticationUseCase, UserMapper userMapper, JwtService jwtService) {
+                          UserAuthenticationUseCase userAuthenticationUseCase, UserMapper userMapper,
+                          JwtService jwtService) {
         this.userRegistrationUseCase = userRegistrationUseCase;
         this.userAuthenticationUseCase = userAuthenticationUseCase;
         this.userMapper = userMapper;
@@ -60,7 +59,8 @@ public class UserController {
         userRegistrationUseCase.registerUser(userMapper.toUser(request));
         log.info("Usuário criado com sucesso::UserController");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(BaseResponse.<String>builder().success(true).message("Usuário criado com sucesso").build());
+                .body(BaseResponse.<String>builder().success(true).message("Usuário criado com sucesso")
+                        .build());
     }
 
     @Operation(summary = "Authenticate user", description = "Authenticates a user and returns JWT token")

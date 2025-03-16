@@ -17,7 +17,7 @@ public class User {
             Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     private static final Pattern PASSWORD_PATTERN =
-            Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$");
+            Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!(){}\\[\\]~-])(?=\\S+$).{8,}$");
 
     public User(UUID id, String name, String password, String email) throws UserException {
         this.id = id;

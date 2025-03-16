@@ -145,8 +145,8 @@ A documentação da API está disponível através do Swagger UI:
 - Implementar tokens de atualização (refresh tokens)
 - Adicionar controle de acesso baseado em funções
 - Implementar autenticação de múltiplos fatores
-- Adicionar limitação de taxa de API
-- Implementar configuração CORS
+- Implementar configuração CORS ✅
+- Adicionar limitação de taxa de API ✅
 
 ### Arquitetura
 
