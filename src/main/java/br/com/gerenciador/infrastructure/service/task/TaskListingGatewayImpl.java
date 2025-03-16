@@ -34,7 +34,13 @@ public class TaskListingGatewayImpl implements TaskListingGateway {
     public List<Task> listTasksByUserId(UUID userId) throws TaskException {
         try {
             List<TaskEntity> taskEntities = taskEntityRepository.findByUserIdAndDeletedAtIsNull(userId);
-            return convertToTaskList(taskEntities, "listTasksByUserId");
+
+            LocalDateTime now = LocalDateTime.now();
+            List<TaskEntity> validTasks = taskEntities.stream()
+                    .filter(entity -> entity.getDueAt().isAfter(now) || entity.getDueAt().isEqual(now))
+                    .collect(Collectors.toList());
+
+            return convertToTaskList(validTasks, "listTasksByUserId");
         } catch (Exception e) {
             log.error("Erro ao listar tarefas por usuário::TaskListingGatewayImpl", e);
             throw new TaskException("Erro interno do servidor", ErrorCodeEnum.SYS0001.getCode());
