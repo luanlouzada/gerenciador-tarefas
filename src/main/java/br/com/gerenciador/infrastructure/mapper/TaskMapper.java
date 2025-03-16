@@ -5,6 +5,7 @@ import br.com.gerenciador.domain.exception.TaskException;
 import br.com.gerenciador.domain.exception.enums.ErrorCodeEnum;
 import br.com.gerenciador.domain.model.Task;
 import br.com.gerenciador.infrastructure.dto.request.task.TaskCreationRequest;
+import br.com.gerenciador.infrastructure.dto.request.task.TaskUpdateRequest;
 import br.com.gerenciador.infrastructure.entity.TaskEntity;
 import br.com.gerenciador.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,28 @@ public class TaskMapper {
         );
     }
 
+    public Task toTask(TaskUpdateRequest request, UserEntity userEntity) throws TaskException {
+        LocalDateTime dueAtDate;
+
+        if (request.dueAt() != null && !request.dueAt().isEmpty()) {
+            dueAtDate = parseDueDate(request.dueAt());
+        } else {
+            dueAtDate = LocalDateTime.now().plusDays(1);
+        }
+
+        Task task = new Task(
+                userEntity.getId(),
+                null,
+                request.title(),
+                request.description(),
+                request.status() != null ? request.status() : TaskStatusEnum.IN_PROGRESS,
+                LocalDateTime.now(),
+                dueAtDate
+        );
+
+        return task;
+    }
+
     private LocalDateTime parseDueDate(String dueDateStr) throws TaskException {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -80,4 +103,6 @@ public class TaskMapper {
             );
         }
     }
+
+
 }
