@@ -21,6 +21,7 @@ public enum ErrorCodeEnum {
     TASK0006("Descrição da tarefa muito longa", "TASK-0006"),
     TASK0007("O título deve ter pelo menos 20 caracteres", "TASK-0007"),
     TASK0008("Já existe uma tarefa com esse título", "TASK-0008"),
+    TASK0009("O título não pode ter mais que 255 caracteres", "TASK-0009"),
 
     AUTH0001("Falha na autenticação", "AUTH-0001"),
     AUTH0002("Token inválido ou expirado", "AUTH-0002"),
@@ -32,7 +33,7 @@ public enum ErrorCodeEnum {
     SYS0004("Invalid Request", "SYS-0004"),
     SYS0005("Erro ao processar tarefas próximas ao vencimento", "SYS-0005"),
     SYS0006("Erro ao processar tarefas vencidas", "SYS-0006");
-    
+
     private String message;
     private String code;
 

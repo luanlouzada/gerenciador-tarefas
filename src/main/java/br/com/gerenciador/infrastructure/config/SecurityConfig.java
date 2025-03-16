@@ -1,12 +1,11 @@
 package br.com.gerenciador.infrastructure.config;
 
-import java.util.Arrays;
-import java.util.List;
-
+import br.com.gerenciador.infrastructure.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,7 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import br.com.gerenciador.infrastructure.security.JwtAuthenticationFilter;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -39,8 +39,12 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With",
+                "x-sockjs-transport", "Access-Control-Allow-Origin"));
+        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -56,11 +60,26 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/registerUser", "/api/v1/user/login", "/swagger-ui/**",
                                 "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**")
                         .permitAll()
+
+                        .requestMatchers("/ws/**", "/ws/info/**", "/ws/notifications/**",
+                                "/ws/notifications/info/**", "/ws/notifications/websocket/**",
+                                "/ws/notifications/sockjs-info/**")
+                        .permitAll()
+
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/ws/**", "/ws/notifications/**",
+                        "/ws/info/**", "/ws/notifications/info/**",
+                        "/ws/notifications/websocket/**", "/error");
     }
 }

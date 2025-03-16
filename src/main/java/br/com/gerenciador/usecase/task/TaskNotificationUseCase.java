@@ -1,10 +1,10 @@
 package br.com.gerenciador.usecase.task;
 
-import br.com.gerenciador.domain.exception.SystemException;
-import br.com.gerenciador.domain.model.Task;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import br.com.gerenciador.domain.exception.SystemException;
+import br.com.gerenciador.domain.model.Task;
 
 public interface TaskNotificationUseCase {
     void notifyTasksDueToday() throws SystemException;
@@ -12,4 +12,6 @@ public interface TaskNotificationUseCase {
     void notifyTasksDueOn(LocalDate date) throws SystemException;
 
     void notifyDueTasks(List<Task> tasks) throws SystemException;
+
+    void notifyTasksAboutToExpire() throws SystemException;
 }

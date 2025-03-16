@@ -1,14 +1,15 @@
 package br.com.gerenciador.infrastructure.repository;
 
-import br.com.gerenciador.domain.enums.TaskStatusEnum;
-import br.com.gerenciador.infrastructure.entity.TaskEntity;
-import br.com.gerenciador.infrastructure.entity.UserEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import br.com.gerenciador.domain.enums.TaskStatusEnum;
+import br.com.gerenciador.infrastructure.entity.TaskEntity;
+import br.com.gerenciador.infrastructure.entity.UserEntity;
 
 @Repository
 public interface TaskEntityRepository extends JpaRepository<TaskEntity, UUID> {
@@ -29,4 +30,9 @@ public interface TaskEntityRepository extends JpaRepository<TaskEntity, UUID> {
     List<TaskEntity> findByUserIdAndDueAtAndDeletedAtIsNull(UUID userId, LocalDateTime dueAt);
 
     boolean existsByUserIdAndTitleIgnoreCaseAndDeletedAtIsNull(UUID userId, String title);
+
+    List<TaskEntity> findByDueAtBetweenAndDeletedAtIsNullAndStatusNot(
+            LocalDateTime start,
+            LocalDateTime end,
+            TaskStatusEnum status);
 }

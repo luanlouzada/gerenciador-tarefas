@@ -35,7 +35,6 @@ public class TaskSchedulerGatewayImpl implements TaskSchedulerGateway {
         this.taskNotificationUseCase = taskNotificationUseCase;
     }
 
-    // Método da interface
     @Override
     public void checkDueTasks(List<Task> tasks) throws SystemException {
         try {
@@ -58,7 +57,6 @@ public class TaskSchedulerGatewayImpl implements TaskSchedulerGateway {
         }
     }
 
-    // Método agendado
     @Scheduled(fixedRate = 300000) // (300.000ms) = 5min
     public void checkDueTasksScheduled() {
         log.info("Verificando tarefas próximas ao vencimento::TaskSchedulerGatewayImpl");
@@ -89,7 +87,6 @@ public class TaskSchedulerGatewayImpl implements TaskSchedulerGateway {
         }
     }
 
-    // Método da interface
     @Override
     public void checkExpiredTasks(List<Task> tasks) throws SystemException {
         try {
@@ -116,7 +113,6 @@ public class TaskSchedulerGatewayImpl implements TaskSchedulerGateway {
         }
     }
 
-    // Método agendado
     @Scheduled(fixedRate = 300000) // (300.000ms) = 5min
     public void checkExpiredTasksScheduled() {
         log.info("Verificando tarefas vencidas::TaskSchedulerGatewayImpl");
@@ -149,6 +145,17 @@ public class TaskSchedulerGatewayImpl implements TaskSchedulerGateway {
             } catch (SystemException e) {
                 log.error("Erro ao processar tarefas vencidas::TaskSchedulerGatewayImpl", e);
             }
+        }
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void notifyTasksAboutToExpireScheduled() {
+        log.info("Verificando e notificando tarefas prestes a expirar::TaskSchedulerGatewayImpl");
+        try {
+            taskNotificationUseCase.notifyTasksAboutToExpire();
+            log.info("Processo de notificação de tarefas prestes a expirar concluído::TaskSchedulerGatewayImpl");
+        } catch (SystemException e) {
+            log.error("Erro ao notificar tarefas prestes a expirar::TaskSchedulerGatewayImpl", e);
         }
     }
 }

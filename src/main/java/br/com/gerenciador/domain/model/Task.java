@@ -46,6 +46,12 @@ public class Task {
                     ErrorCodeEnum.TASK0007.getCode()
             );
         }
+        if (title.trim().length() > 255) {
+            throw new TaskException(
+                    ErrorCodeEnum.TASK0009.getMessage(),
+                    ErrorCodeEnum.TASK0009.getCode()
+            );
+        }
 
         this.title = title;
     }

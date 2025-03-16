@@ -1,11 +1,11 @@
 package br.com.gerenciador.infrastructure.security;
 
-import static br.com.gerenciador.infrastructure.utils.Utilities.log;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.UUID;
-
+import br.com.gerenciador.application.gateway.user.UserQueryGateway;
+import br.com.gerenciador.domain.exception.UserException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,12 +13,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import br.com.gerenciador.application.gateway.user.UserQueryGateway;
-import br.com.gerenciador.domain.exception.UserException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.UUID;
+
+import static br.com.gerenciador.infrastructure.utils.Utilities.log;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -53,7 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (jwtService.isTokenValid(jwt)) {
                     UUID userId = UUID.fromString(userIdStr);
 
-                    // Se precisar verificar se o usuário existe no banco
                     var userOptional = userQueryGateway.findById(userId);
                     if (userOptional.isPresent()) {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -64,7 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                        // Adiciona o ID do usuário como atributo da requisição para uso nos controllers
                         request.setAttribute("userId", userId);
                     }
                 }

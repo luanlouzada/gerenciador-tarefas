@@ -38,4 +38,37 @@ public class TaskNotificationUseCaseImpl implements TaskNotificationUseCase {
             taskNotificationGateway.sendNotification(task);
         }
     }
+
+    @Override
+    public void notifyTasksAboutToExpire() throws SystemException {
+        List<Task> tasks60min = taskNotificationGateway.findTasksAboutToExpire(60);
+        if (!tasks60min.isEmpty()) {
+            for (Task task : tasks60min) {
+                taskNotificationGateway.sendNotification(task);
+            }
+        }
+
+        List<Task> tasks30min = taskNotificationGateway.findTasksAboutToExpire(30);
+        if (!tasks30min.isEmpty()) {
+            for (Task task : tasks30min) {
+                taskNotificationGateway.sendNotification(task);
+            }
+        }
+
+
+        List<Task> tasks5min = taskNotificationGateway.findTasksAboutToExpire(5);
+        if (!tasks5min.isEmpty()) {
+            for (Task task : tasks5min) {
+                taskNotificationGateway.sendNotification(task);
+            }
+        }
+
+
+        List<Task> tasks1min = taskNotificationGateway.findTasksAboutToExpire(1);
+        if (!tasks1min.isEmpty()) {
+            for (Task task : tasks1min) {
+                taskNotificationGateway.sendNotification(task);
+            }
+        }
+    }
 }
