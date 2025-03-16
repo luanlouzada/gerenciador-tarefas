@@ -68,9 +68,5 @@ echo "Iniciando a aplicação..."\n\
 java -jar app.jar\n\
 ' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-# Healthcheck para verificar se a aplicação está rodando
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
-
 # Comando para iniciar a aplicação usando o script
 ENTRYPOINT ["/app/entrypoint.sh"]
