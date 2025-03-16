@@ -21,10 +21,17 @@ import br.com.gerenciador.infrastructure.mapper.UserMapper;
 import br.com.gerenciador.infrastructure.security.JwtService;
 import br.com.gerenciador.usecase.user.UserAuthenticationUseCase;
 import br.com.gerenciador.usecase.user.UserRegistrationUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("api/v1/user")
+@Tag(name = "User", description = "Endpoints for user management")
 public class UserController {
     private final UserRegistrationUseCase userRegistrationUseCase;
     private final UserAuthenticationUseCase userAuthenticationUseCase;
@@ -39,6 +46,12 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
+    @Operation(summary = "Register a new user", description = "Creates a new user account in the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "409", description = "User already exists")
+    })
     @PostMapping("/registerUser")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<BaseResponse<String>> registerUser(@Valid @RequestBody RegistrationUserRequest request)
@@ -50,6 +63,12 @@ public class UserController {
                 .body(BaseResponse.<String>builder().success(true).message("Usuário criado com sucesso").build());
     }
 
+    @Operation(summary = "Authenticate user", description = "Authenticates a user and returns JWT token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Authentication successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid credentials"),
+            @ApiResponse(responseCode = "401", description = "Authentication failed")
+    })
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<AuthResponse>> login(@Valid @RequestBody LoginUserRequest request)
             throws UserException {
