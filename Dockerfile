@@ -22,6 +22,14 @@ WORKDIR /app
 
 # Copia o JAR gerado do estágio de build
 COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/Makefile ./
+
+# Instala ferramentas necessárias
+RUN apt-get update && apt-get install -y \
+    curl \
+    make \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
 # Expõe a porta usada pela aplicação
 EXPOSE 8080
@@ -31,12 +39,14 @@ ENV DATABASE_URL=jdbc:postgresql://postgres:5432/tasksmanager
 ENV DATABASE_USERNAME=admin
 ENV DATABASE_PASSWORD=admin
 ENV JWT_SECRET=your_jwt_secret_key
-ENV ALLOWED_ORIGINS=https://gerenciador-frontend-five.vercel.app/
+ENV ALLOWED_ORIGINS=https://gerenciador-frontend-five.vercel.app
 
 # Cria um script de inicialização
 RUN echo '#!/bin/bash\n\
 echo "Esperando o banco de dados inicializar..."\n\
-until PGPASSWORD=$DATABASE_PASSWORD psql -h ${DATABASE_URL//jdbc:postgresql:\/\//} -U $DATABASE_USERNAME -c "\\q"; do\n\
+DB_HOST=$(echo $DATABASE_URL | sed -n "s|jdbc:postgresql://\\([^:]*\\).*|\\1|p")\n\
+echo "Conectando ao host: $DB_HOST"\n\
+until PGPASSWORD=$DATABASE_PASSWORD psql -h $DB_HOST -U $DATABASE_USERNAME -c "\\q"; do\n\
   >&2 echo "Banco de dados indisponível - esperando..."\n\
   sleep 2\n\
 done\n\
@@ -48,6 +58,5 @@ echo "Iniciando a aplicação..."\n\
 java -jar app.jar\n\
 ' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-
-# Comando para iniciar a aplicação
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Comando para iniciar a aplicação - USANDO O SCRIPT
+ENTRYPOINT ["/app/entrypoint.sh"]
