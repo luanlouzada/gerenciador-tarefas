@@ -60,7 +60,7 @@ if [[ $DATABASE_URL == postgresql://* ]]; then\n\
     DB_USER="${BASH_REMATCH[1]}"\n\
     DB_PASS="${BASH_REMATCH[2]}"\n\
     DB_HOST="${BASH_REMATCH[3]}"\n\
-    DB_PORT="${BASH_REMATCH[5]:-5
+    DB_PORT="${BASH_REMATCH[5]:-5432}"\n\
     DB_NAME="${BASH_REMATCH[6]}"\n\
     # Construir URL JDBC\n\
     JDBC_URL="jdbc:postgresql://$DB_HOST:$DB_PORT/$DB_NAME"\n\
